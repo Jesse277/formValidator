@@ -6,10 +6,11 @@ var password = document.getElementById("password");
 var password2 = document.getElementById("password2");
 
 //show error
-function showErrorMessage(input, message) {
+function showError(input, message) {
     var formControl = input.parentElement;
     formControl.className = "form-control error";
-    formControl.getElementsByTagName('small')[0].innerText = message;
+    var small = formControl.querySelector("small");
+    small.innerText = message
 
 }
 //show success
@@ -18,41 +19,53 @@ function showSuccess(input) {
     formControl.className = "form-control success";
 
 }
+//get keywords
+function getKeywords(input) {
+    return input.placeholder.slice(3);
+}
+//check if items are required
+function checkRequired(inputArr) {
+    inputArr.forEach(function (input) {
+        if (input.value.trim() === "") {
+            showError(input, `${getKeywords(input)}为必填项`);
+        } else {
+            showSuccess(input);
+        }
+    });
+}
+//check if the length is okay
+function checkLength(input, min, max) {
+    if (input.value.length < min) {
+        showError(input, `${getKeywords(input)}至少${min}个字符`);
+    } else if (input.value.length > max) {
+        showError(input, `${getKeywords(input)}最多${max}个字符`);
+    } else {
+        showSuccess(input);
+    }
+}
 //check if email is valid
 function checkEmail(input) {
     var reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
-    return reg.test(input);
-
+    if (reg.test(input.value.trim())) {
+        showSuccess(input);
+    } else {
+        showError(input, "邮箱格式错误");
+    }
 }
+//check password match
+function checkPwdsMatch(input1, input2) {
+    if (input1.value !== input2.value) {
+        showError(input2, "密码不匹配");
+    }
+}
+
 //add event
 form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (username.value === "") {
-        showErrorMessage(username, "用户名为必填项");
-    } else if (username.value.length < 4 || username.value.length > 15) {
-        showErrorMessage(username, "用户名长度必须在4-15之间");
-    } else {
-        showSuccess(username);
-    }
-    if (email.value === "") {
-        showErrorMessage(email, "邮箱为必填项");
-    } else if (!checkEmail(email.value)) {
-        showErrorMessage(email, "邮箱格式错误")
-    } else {
-        showSuccess(email);
-    }
-    if (password.value === "") {
-        showErrorMessage(password, "密码为必填项");
-    } else if (password.value.length < 6 || password.value.length > 12) {
-        showErrorMessage(password, "密码长度必须在4-15之间");
-    } else {
-        showSuccess(password);
-    }
-    if (password2.value === "") {
-        showErrorMessage(password2, "确认密码为必填项");
-    } else if (password.value !== password2.value) {
-        showErrorMessage(password2, "密码不一致")
-    } else {
-        showSuccess(password2);
-    }
+
+    checkRequired([username, email, password, password2]);
+    checkLength(username, 3, 15);
+    checkLength(password, 6, 12);
+    checkEmail(email);
+    checkPwdsMatch(password, password2);
 });
